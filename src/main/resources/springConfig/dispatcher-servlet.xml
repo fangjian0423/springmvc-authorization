@@ -12,6 +12,7 @@
            http://www.springframework.org/schema/context/spring-context-4.0.xsd" default-autowire="byName">
 
     <context:component-scan base-package="org.format.demo.controller"/>
+    <context:component-scan base-package="org.format.demo.postprocess"/>
 
     <mvc:resources location="/static/" mapping="/static/**"/>
     <mvc:annotation-driven/>
