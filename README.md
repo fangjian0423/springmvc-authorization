@@ -1,4 +1,4 @@
 springmvc-authorization
 =======================
 
-a au
+SpringMVC简单的权限框架
