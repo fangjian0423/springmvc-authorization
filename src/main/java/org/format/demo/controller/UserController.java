@@ -7,10 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class UserController {
 
-    public UserController() {
-        System.out.println("user");
-    }
-
     @RequestMapping
     public String index() {
         return "user";
