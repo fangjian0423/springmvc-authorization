@@ -4,6 +4,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.format.demo.annotation.Authorization;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
@@ -14,9 +16,10 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component
-public class AuthPostProcess implements BeanPostProcessor {
+public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
 
     private static Log log = LogFactory.getLog(AuthPostProcess.class);
+    private BeanFactory beanFactory;
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
@@ -66,9 +69,6 @@ public class AuthPostProcess implements BeanPostProcessor {
                 }
             }
 
-            log.info(roleAuth);
-            log.info(authAuth);
-
         }
 
 
@@ -80,4 +80,8 @@ public class AuthPostProcess implements BeanPostProcessor {
         return bean;
     }
 
+    @Override
+    public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+        this.beanFactory = beanFactory;
+    }
 }
