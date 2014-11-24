@@ -17,5 +17,4 @@
     <mvc:annotation-driven/>
     <import resource="viewConfig/jsp.xml"/>
 
-
 </beans>
