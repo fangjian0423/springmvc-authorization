@@ -3,6 +3,8 @@ package org.format.demo.interceptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -33,11 +35,17 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return true;
             } else {
                 log.info("非admin用户，验证不通过");
+                HandlerMethod handlerMethod = (HandlerMethod) obj;
+                // json处理
+                if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)) {
+                    response.sendRedirect(request.getContextPath()+"/auth/noauth-body?success=false&msg=noauth");
+                } else {
+                    response.sendRedirect(request.getContextPath()+"/auth/noauth");
+                }
+                return false;
             }
         }
-
-        response.sendRedirect(request.getContextPath()+"/auth/noauth");
-        return false;
+        return true;
     }
 
     @Override

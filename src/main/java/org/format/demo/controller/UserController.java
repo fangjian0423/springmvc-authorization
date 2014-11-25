@@ -3,6 +3,7 @@ package org.format.demo.controller;
 import org.format.demo.annotation.Authorization;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @RequestMapping("/user")
 @Controller
@@ -13,8 +14,15 @@ public class UserController {
         return "user";
     }
 
+    @RequestMapping("/update")
+    @ResponseBody
+    @Authorization(roles = {"manager"})
+    public String update() {
+        return "user";
+    }
+
     @RequestMapping("/add")
-    @Authorization(roles = {"admin"})
+    @Authorization(roles = {"manager"})
     public String add() {
         return "user";
     }
