@@ -24,8 +24,19 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object obj) throws Exception {
-        //TODO 拦截器验证权限
-        log.info("a request coming");
+        String servletPath = request.getServletPath();
+        if(mappingInfoMap.containsKey(servletPath)) {
+            // 验证权限
+            List<String> auths = mappingInfoMap.get(servletPath).getAuth();
+            List<String> roles = mappingInfoMap.get(servletPath).getRoles();
+            if(roles.contains("admin")) {
+                return true;
+            } else {
+                log.info("非admin用户，验证不通过");
+            }
+        }
+
+        response.sendRedirect(request.getContextPath()+"/auth/noauth");
         return false;
     }
 
