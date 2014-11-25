@@ -83,6 +83,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                         methodUrl = methodMapping.value()[0];
                     }
                     if((!CollectionUtils.isEmpty(roleAuth) || !CollectionUtils.isEmpty(authAuth)) && methodUrl != null) {
+                        mapping.add(classUrl + methodUrl);
                         authInterceptor.addAuth(classUrl + methodUrl, roleAuth, authAuth);
                     }
                 } else {
@@ -93,18 +94,22 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                 }
             }
 
-            //TODO 每个带有RequestMapping和Controller注解的控制器需要加入拦截器
-            RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping)beanFactory.getBean("org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping#0");
-            Field interceptorField = null;
-            List<MappedInterceptor> mappedInterceptorList = null;
-            try {
-                interceptorField = requestMappingHandlerMapping.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField("mappedInterceptors");
-                interceptorField.setAccessible(true);
-                mappedInterceptorList = (List<MappedInterceptor>)interceptorField.get(requestMappingHandlerMapping);
-                mappedInterceptorList.add(new MappedInterceptor(new String[] {classUrl + "/**"}, authInterceptor));
-                ReflectionUtils.setField(interceptorField, requestMappingHandlerMapping, mappedInterceptorList);
-            } catch (Exception e) {
-                log.error("RequestMappingHandlerMapping reflect field error", e);
+            if(!mapping.isEmpty()) {
+                if(log.isInfoEnabled()) {
+                    log.info("class: " + bean.getClass() + ", mapping: " + mapping);
+                }
+                RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping)beanFactory.getBean("org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping#0");
+                Field interceptorField = null;
+                List<MappedInterceptor> mappedInterceptorList = null;
+                try {
+                    interceptorField = requestMappingHandlerMapping.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField("mappedInterceptors");
+                    interceptorField.setAccessible(true);
+                    mappedInterceptorList = (List<MappedInterceptor>)interceptorField.get(requestMappingHandlerMapping);
+                    mappedInterceptorList.add(new MappedInterceptor(new String[] {classUrl + "/**"}, authInterceptor));
+                    ReflectionUtils.setField(interceptorField, requestMappingHandlerMapping, mappedInterceptorList);
+                } catch (Exception e) {
+                    log.error("RequestMappingHandlerMapping reflect field error", e);
+                }
             }
 
         }
