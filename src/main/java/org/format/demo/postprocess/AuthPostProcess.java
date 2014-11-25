@@ -82,7 +82,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     if(methodMapping.value().length > 0) {
                         methodUrl = methodMapping.value()[0];
                     }
-                    if(!CollectionUtils.isEmpty(roleAuth) && !CollectionUtils.isEmpty(authAuth) && methodUrl != null) {
+                    if((!CollectionUtils.isEmpty(roleAuth) || !CollectionUtils.isEmpty(authAuth)) && methodUrl != null) {
                         authInterceptor.addAuth(classUrl + methodUrl, roleAuth, authAuth);
                     }
                 } else {
