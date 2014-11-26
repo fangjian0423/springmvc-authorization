@@ -78,6 +78,9 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
 
                     List<String> methodUrls = null;
                     RequestMapping methodMapping = method.getAnnotation(RequestMapping.class);
+                    if(methodMapping == null) {
+                        continue;
+                    }
                     if(methodMapping.value().length > 0) {
                         methodUrls = Arrays.asList(methodMapping.value());
                         methodUrls = (List<String>)CollectionUtils.collect(methodUrls, new Transformer() {
