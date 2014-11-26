@@ -30,12 +30,12 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
         Authorization classAuthAnno = null;
-        String classUrl = null;
+        List<String> classUrls = new ArrayList<String>();
         if(bean.getClass().isAnnotationPresent(Controller.class)) {
             classAuthAnno = bean.getClass().getAnnotation(Authorization.class);
             RequestMapping classMapping = bean.getClass().getAnnotation(RequestMapping.class);
             if(classMapping.value().length > 0) {
-                classUrl = classMapping.value()[0];
+                classUrls.addAll(Arrays.asList(classMapping.value()));
             }
             if(log.isInfoEnabled()) {
                 log.info("class: " + bean.getClass() + ", annotaion: " + classAuthAnno);
@@ -44,7 +44,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
             return bean;
         }
 
-        if(classUrl != null) {
+        if(!classUrls.isEmpty()) {
             AuthInterceptor authInterceptor = new AuthInterceptor();
             List<String> roles = new ArrayList<String>();
             List<String> auth = new ArrayList<String>();
@@ -99,8 +99,10 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     }
                     if((!CollectionUtils.isEmpty(roleAuth) || !CollectionUtils.isEmpty(authAuth)) && !methodUrls.isEmpty()) {
                         for(String methodUrl : methodUrls) {
-                            mapping.add(classUrl + methodUrl);
-                            authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth));
+                            for(String classUrl : classUrls) {
+                                mapping.add(classUrl + methodUrl);
+                                authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth));
+                            }
                         }
                     }
                 } else {
@@ -122,7 +124,9 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     interceptorField = requestMappingHandlerMapping.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField("mappedInterceptors");
                     interceptorField.setAccessible(true);
                     mappedInterceptorList = (List<MappedInterceptor>)interceptorField.get(requestMappingHandlerMapping);
-                    mappedInterceptorList.add(new MappedInterceptor(new String[] {classUrl + "/**"}, authInterceptor));
+                    for(String classUrl : classUrls) {
+                        mappedInterceptorList.add(new MappedInterceptor(new String[] {classUrl + "/**"}, authInterceptor));
+                    }
                     ReflectionUtils.setField(interceptorField, requestMappingHandlerMapping, mappedInterceptorList);
                 } catch (Exception e) {
                     log.error("RequestMappingHandlerMapping reflect field error", e);
