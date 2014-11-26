@@ -1,0 +1,29 @@
+# 用户表
+CREATE TABLE TB_USERS (
+
+);
+
+# 角色表
+CREATE TABLE TB_ROLES (
+
+);
+
+# 权限表
+CREATE TABLE TB_AUTHS (
+
+);
+
+# 用户角色关系表
+CREATE TABLE TB_USER_ROLE (
+
+);
+
+# 角色权限关系表
+CREATE TABLE TB_ROLE_AUTH (
+
+);
+
+# 用户权限关系表
+CREATE TABLE TB_USER_AUTH (
+
+);
