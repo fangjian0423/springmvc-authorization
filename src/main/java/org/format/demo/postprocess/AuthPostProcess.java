@@ -1,5 +1,7 @@
 package org.format.demo.postprocess;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.Transformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.format.demo.annotation.Authorization;
@@ -10,7 +12,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -75,16 +76,29 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                         authAuth.addAll(Arrays.asList(methodAuth.auth()));
                     }
 
-                    String methodUrl = null;
+                    List<String> methodUrls = null;
                     RequestMapping methodMapping = method.getAnnotation(RequestMapping.class);
                     if(methodMapping.value().length > 0) {
-                        methodUrl = methodMapping.value()[0];
+                        methodUrls = Arrays.asList(methodMapping.value());
+                        methodUrls = (List<String>)CollectionUtils.collect(methodUrls, new Transformer() {
+                            @Override
+                            public Object transform(Object o) {
+                                if(o.toString().endsWith("/")) {
+                                    return o.toString();
+                                } else {
+                                    return o.toString()+"/";
+                                }
+                            }
+                        });
                     } else {
-                        methodUrl = "/";
+                        methodUrls = new ArrayList<String>();
+                        methodUrls.add("/");
                     }
-                    if((!CollectionUtils.isEmpty(roleAuth) || !CollectionUtils.isEmpty(authAuth)) && methodUrl != null) {
-                        mapping.add(classUrl + methodUrl);
-                        authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth));
+                    if((!CollectionUtils.isEmpty(roleAuth) || !CollectionUtils.isEmpty(authAuth)) && !methodUrls.isEmpty()) {
+                        for(String methodUrl : methodUrls) {
+                            mapping.add(classUrl + methodUrl);
+                            authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth));
+                        }
                     }
                 } else {
                     if(log.isInfoEnabled()) {

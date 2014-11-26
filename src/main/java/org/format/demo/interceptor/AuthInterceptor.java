@@ -27,6 +27,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object obj) throws Exception {
         String servletPath = request.getServletPath();
+        if(!servletPath.endsWith("/")) {
+            servletPath += "/";
+        }
         if(mappingInfoMap.containsKey(servletPath)) {
             // 验证权限
             List<String> auths = mappingInfoMap.get(servletPath).getAuth();

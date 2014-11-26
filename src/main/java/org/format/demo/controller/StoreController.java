@@ -14,4 +14,9 @@ public class StoreController {
         return "store";
     }
 
+    @RequestMapping("/update")
+    public String update() {
+        return "store";
+    }
+
 }
