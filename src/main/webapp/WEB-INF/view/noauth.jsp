@@ -4,6 +4,7 @@
     <title></title>
 </head>
 <body>
-    sorry, 没有权限
+    sorry, 没有权限<hr/>
+    <a href="#" onclick="history.go(-1);return false;">back</a>
 </body>
 </html>

@@ -7,6 +7,8 @@
 <body>
     <input id="updateuser" type="button" value="update user"/>
     <input id="deleteuser" type="button" value="delete user"/>
+    <hr/>
+    <a href="<%=request.getContextPath()%>/user/add">add user</a>
 </body>
 
 <script type="text/javascript">
