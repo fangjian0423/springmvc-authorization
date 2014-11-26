@@ -14,6 +14,16 @@
     <context:component-scan base-package="org.format.demo.controller"/>
     <context:component-scan base-package="org.format.demo.postprocess"/>
 
+    <bean id="defaultRequestMappingHandlerAdapter"
+          class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+        <property name="messageConverters">
+            <list>
+                <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+                </bean>
+            </list>
+        </property>
+    </bean>
+
     <mvc:resources location="/static/" mapping="/static/**"/>
     <mvc:annotation-driven/>
     <import resource="viewConfig/jsp.xml"/>
