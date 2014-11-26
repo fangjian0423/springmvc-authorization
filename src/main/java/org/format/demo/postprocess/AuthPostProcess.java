@@ -18,9 +18,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
@@ -62,18 +60,18 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
             Method[] methods = bean.getClass().getDeclaredMethods();
             List<String> mapping = new ArrayList<String>(methods.length);
             for(Method method : methods) {
-                List<String> roleAuth = new ArrayList<String>(roles);
-                List<String> authAuth = new ArrayList<String>(auth);
-                if(method.isAnnotationPresent(Authorization.class) && method.isAnnotationPresent(RequestMapping.class)) {
+                Set<String> roleAuth = new HashSet<String>(roles);
+                Set<String> authAuth = new HashSet<String>(auth);
+                if((method.isAnnotationPresent(Authorization.class) && method.isAnnotationPresent(RequestMapping.class)) || classAuthAnno != null) {
                     if(log.isInfoEnabled()) {
                         log.info("class: " + bean.getClass() + ", method: " + method.getName() +
                                 "annotaion: " + method.getAnnotation(Authorization.class));
                     }
                     Authorization methodAuth = method.getAnnotation(Authorization.class);
-                    if(methodAuth.roles().length > 0) {
+                    if(methodAuth != null && methodAuth.roles().length > 0) {
                         roleAuth.addAll(Arrays.asList(methodAuth.roles()));
                     }
-                    if(methodAuth.auth().length > 0) {
+                    if(methodAuth != null && methodAuth.auth().length > 0) {
                         authAuth.addAll(Arrays.asList(methodAuth.auth()));
                     }
 
@@ -81,10 +79,12 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     RequestMapping methodMapping = method.getAnnotation(RequestMapping.class);
                     if(methodMapping.value().length > 0) {
                         methodUrl = methodMapping.value()[0];
+                    } else {
+                        methodUrl = "/";
                     }
                     if((!CollectionUtils.isEmpty(roleAuth) || !CollectionUtils.isEmpty(authAuth)) && methodUrl != null) {
                         mapping.add(classUrl + methodUrl);
-                        authInterceptor.addAuth(classUrl + methodUrl, roleAuth, authAuth);
+                        authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth));
                     }
                 } else {
                     if(log.isInfoEnabled()) {
