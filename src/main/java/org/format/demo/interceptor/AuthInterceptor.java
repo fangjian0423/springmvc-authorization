@@ -4,6 +4,8 @@ package org.format.demo.interceptor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -34,6 +36,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 验证权限
             List<String> auths = mappingInfoMap.get(servletPath).getAuth();
             List<String> roles = mappingInfoMap.get(servletPath).getRoles();
+
+//            ServletRequestAttributes reqAttr = (ServletRequestAttributes)(RequestContextHolder.getRequestAttributes());
+//            String userName = (String)reqAttr.getRequest().getSession().getAttribute("LOGIN_NAME");
+
             if(roles.contains("admin")) {
                 return true;
             } else {
