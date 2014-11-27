@@ -17,5 +17,14 @@
         WHERE role.NAME = #{roleName}
     </select>
 
+    <select id="getByUser" resultType="org.format.demo.entity.Role" parameterType="string">
+        SELECT role.* FROM TB_USERS USER
+            INNER JOIN TB_USER_ROLE ur
+        ON ur.USER_ID = user.ID
+            INNER JOIN TB_ROLES role
+        ON role.ID = ur.ROLE_ID
+        WHERE user.NAME = #{userName}
+    </select>
+
 
 </mapper>
