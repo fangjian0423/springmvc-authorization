@@ -19,7 +19,7 @@ public class AuthService {
     @Autowired
     private RoleDao roleDao;
 
-    public UserDto getUsers(String name) {
+    public UserDto getUser(String name) {
         UserDto userDto = userDao.searchByName(name);
         List<Role> roleList = roleDao.getByUser(userDto.getName());
         List<RoleDto> roleDtoList = new ArrayList<RoleDto>(roleList.size());
