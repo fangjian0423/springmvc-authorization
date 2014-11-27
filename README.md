@@ -11,3 +11,73 @@ SpringMVC简单的权限框架
 ##其他##
     1. 请求如果是跳转(forward),那么权限不足的话会跳转到权限不足的页面
     2. 请求如果是服务器端写回数据，那么权限不足的话会写回json数据
+
+##实例##
+
+###类上的使用###
+
+    @RequestMapping("/user")
+    @Controller
+    @Authorization(roles = {"admin"})
+    public class UserController {
+        @RequestMapping("/add")
+        public String add() {
+            return "user";
+        }
+    }
+以/user为前缀的地址的访问权限是用户"admin"角色的用户
+
+    @RequestMapping("/user")
+    @Controller
+    @Authorization(auth = {"user_manager"})
+    public class UserController {
+        @RequestMapping("/add")
+        public String add() {
+            return "user";
+        }
+    }
+以/user为前缀的地址的访问权限是拥有"user_manager"权限的用户
+
+
+###方法上的使用###
+
+    @RequestMapping("/user")
+    @Controller
+    public class UserController {
+        @RequestMapping("/add")
+        @Authorization(roles = {"admin"})
+        public String add() {
+            return "user";
+        }
+        @RequestMapping("/delete")
+        public String delete() {
+            return "user";
+        }
+    }
+/user/add地址的访问权限是拥有"admin"角色的用户，/user/delete地址无权限限制
+
+    @RequestMapping("/user")
+    @Controller
+    public class UserController {
+        @RequestMapping("/add")
+        @Authorization(auth = {"add_user"})
+        public String add() {
+            return "user";
+        }
+    }
+/user/add地址的访问权限是拥有"add_user"权限的用户
+
+###类和方法上的使用###
+
+    @RequestMapping("/user")
+    @Controller
+    @Authorization(roles = {"manager1"})
+    public class UserController {
+        @RequestMapping("/add")
+        @Authorization(roles = {"manager2"})
+        public String add() {
+            return "user";
+        }
+    }
+
+/user/add地址的访问权限是拥有"manager1"和"manager2"这2个角色的用户
