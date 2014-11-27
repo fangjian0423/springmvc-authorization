@@ -1,6 +1,10 @@
 package org.format.demo.dto;
 
+import org.apache.commons.collections.CollectionUtils;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class UserDto {
 
@@ -40,4 +44,19 @@ public class UserDto {
     public void setAuthList(List<String> authList) {
         this.authList = authList;
     }
+
+
+    public Set<String> getAllAuth() {
+        Set<String> allAuth = new HashSet<String>();
+        if(CollectionUtils.isNotEmpty(roleList)) {
+            for(RoleDto roleDto : roleList) {
+                allAuth.addAll(roleDto.getAuthList());
+            }
+        }
+        if(CollectionUtils.isNotEmpty(authList)) {
+            allAuth.addAll(authList);
+        }
+        return allAuth;
+    }
+
 }
