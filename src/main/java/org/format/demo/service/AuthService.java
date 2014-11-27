@@ -19,18 +19,15 @@ public class AuthService {
     @Autowired
     private RoleDao roleDao;
 
-    public List<UserDto> getUsers(String name) {
-        List<UserDto> userDtoList = userDao.searchByName(name);
-        for(UserDto userDto : userDtoList) {
-            // 根据用户对应的角色
-            List<Role> roleList = roleDao.getByUser(userDto.getName());
-            List<RoleDto> roleDtoList = new ArrayList<RoleDto>(roleList.size());
-            for(Role role : roleList) {
-                roleDtoList.add(roleDao.searchByName(role.getName()));
-            }
-            userDto.setRoleList(roleDtoList);
+    public UserDto getUsers(String name) {
+        UserDto userDto = userDao.searchByName(name);
+        List<Role> roleList = roleDao.getByUser(userDto.getName());
+        List<RoleDto> roleDtoList = new ArrayList<RoleDto>(roleList.size());
+        for(Role role : roleList) {
+            roleDtoList.add(roleDao.searchByName(role.getName()));
         }
-        return userDtoList;
+        userDto.setRoleList(roleDtoList);
+        return userDto;
     }
 
 }
