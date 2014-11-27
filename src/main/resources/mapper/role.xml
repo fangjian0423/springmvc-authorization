@@ -9,7 +9,7 @@
     </resultMap>
 
     <select id="searchByName" resultMap="resultMap" parameterType="string">
-        SELECT role.NAME, auth.NAME AS auth_name FROM TB_ROLE_AUTH ra
+        SELECT auth.NAME AS auth_name, role.* FROM TB_ROLE_AUTH ra
             INNER JOIN TB_ROLES role
         ON ra.ROLE_ID = role.ID
             INNER JOIN TB_AUTHS auth
