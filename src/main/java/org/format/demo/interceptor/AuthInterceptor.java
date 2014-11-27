@@ -1,8 +1,15 @@
 package org.format.demo.interceptor;
 
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.format.demo.Configuration;
+import org.format.demo.dao.RoleDao;
+import org.format.demo.dto.RoleDto;
+import org.format.demo.dto.UserDto;
+import org.format.demo.service.AuthService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -12,9 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class AuthInterceptor implements HandlerInterceptor {
 
@@ -34,16 +39,34 @@ public class AuthInterceptor implements HandlerInterceptor {
         }
         if(mappingInfoMap.containsKey(servletPath)) {
             // 验证权限
-            List<String> auths = mappingInfoMap.get(servletPath).getAuth();
-            List<String> roles = mappingInfoMap.get(servletPath).getRoles();
+            Set<String> auths = new HashSet<String>(mappingInfoMap.get(servletPath).getAuth());
+            Set<String> roles = new HashSet<String>(mappingInfoMap.get(servletPath).getRoles());
 
-//            ServletRequestAttributes reqAttr = (ServletRequestAttributes)(RequestContextHolder.getRequestAttributes());
-//            String userName = (String)reqAttr.getRequest().getSession().getAttribute("LOGIN_NAME");
+            ServletRequestAttributes reqAttr = (ServletRequestAttributes)(RequestContextHolder.getRequestAttributes());
+            String userName = (String)reqAttr.getRequest().getSession().getAttribute("LOGIN_NAME");
+            if(StringUtils.isEmpty(userName)) {
+                response.sendRedirect(request.getContextPath()+"/login");
+                return false;
+            }
 
-            if(roles.contains("admin")) {
+
+            AuthService authService = (AuthService) Configuration.beanFactory.getBean("authService");
+            UserDto userDto = authService.getUser(userName);
+
+            if(userDto == null) {
+                throw new RuntimeException("user: " + userName + " is not exist");
+            }
+
+            if(CollectionUtils.isNotEmpty(roles)) {
+                // 将角色转换成权限
+                Set<String> roleAuths = transferRoleToAuth(roles);
+                auths.addAll(roleAuths);
+            }
+
+            if(userDto.getAllAuth().containsAll(auths)) {
                 return true;
             } else {
-                log.info("非admin用户，验证不通过");
+                log.info("验证不通过");
                 HandlerMethod handlerMethod = (HandlerMethod) obj;
                 // json处理
                 if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)) {
@@ -55,6 +78,20 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
         }
         return true;
+    }
+
+    private Set<String> transferRoleToAuth(Set<String> roles) {
+        RoleDao roleDao = (RoleDao) Configuration.beanFactory.getBean("roleDao");
+        Set<String> result = new HashSet<String>();
+        for(String role : roles) {
+            RoleDto roleDto = roleDao.searchByName(role);
+            if(roleDto == null) {
+                //FIXME
+                throw new RuntimeException("not exist role: " + role);
+            }
+            result.addAll(roleDto.getAuthList());
+        }
+        return result;
     }
 
     @Override
