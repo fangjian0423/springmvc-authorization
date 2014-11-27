@@ -29,6 +29,22 @@ public class UserController {
         return data;
     }
 
+    @RequestMapping("/batchDelete")
+    @Authorization(roles = {"admin"})
+    @ResponseBody
+    public CommonData batchDelete() {
+        CommonData data = new CommonData(true, "success");
+        return data;
+    }
+
+    @RequestMapping("/batchUpdate")
+    @Authorization(auth = "update-user")
+    @ResponseBody
+    public CommonData batchUpdate() {
+        CommonData data = new CommonData(true, "success");
+        return data;
+    }
+
     @RequestMapping("/add")
     @Authorization(roles = {"manager"})
     public String add() {

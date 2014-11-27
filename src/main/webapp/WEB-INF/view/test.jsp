@@ -7,6 +7,8 @@
 <body>
     <input id="updateuser" type="button" value="update user"/>
     <input id="deleteuser" type="button" value="delete user"/>
+    <input id="batchdeleteuser" type="button" value="batch delete user"/>
+    <input id="batchupdateuser" type="button" value="batch update user"/>
     <hr/>
     <a href="<%=request.getContextPath()%>/user/add">add user</a>
 </body>
@@ -21,6 +23,16 @@
        });
         $('#deleteuser').click(function() {
             $.post("<%=request.getContextPath()%>/user/delete", function(data) {
+                alert(data.msg);
+            });
+        });
+        $('#batchdeleteuser').click(function() {
+            $.post("<%=request.getContextPath()%>/user/batchDelete", function(data) {
+                alert(data.msg);
+            });
+        });
+        $('#batchupdateuser').click(function() {
+            $.post("<%=request.getContextPath()%>/user/batchUpdate", function(data) {
                 alert(data.msg);
             });
         });
