@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.format.demo.dao.RoleDao">
+
+    <resultMap id="resultMap" type="org.format.demo.dto.RoleDto">
+        <id column="ID" property="id"/>
+        <id column="NAME" property="name"/>
+        <collection property="authList" ofType="string" column="auth_name"></collection>
+    </resultMap>
+
+    <select id="searchByName" resultMap="resultMap" parameterType="string">
+        SELECT role.NAME, auth.NAME AS auth_name FROM TB_ROLE_AUTH ra
+            INNER JOIN TB_ROLES role
+        ON ra.ROLE_ID = role.ID
+            INNER JOIN TB_AUTHS auth
+        ON ra.AUTH_ID = auth.ID
+        WHERE role.NAME = #{roleName}
+    </select>
+
+
+</mapper>
