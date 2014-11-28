@@ -10,6 +10,8 @@ public class Configuration implements BeanFactoryAware {
 
     public static BeanFactory beanFactory;
 
+    public static String SESSION_LOGIN = "LOGIN_NAME";
+
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
         Configuration.beanFactory = beanFactory;

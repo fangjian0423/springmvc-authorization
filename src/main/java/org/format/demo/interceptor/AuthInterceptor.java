@@ -45,7 +45,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             AuthMode mode = mappingInfoMap.get(servletPath).getMode();
 
             ServletRequestAttributes reqAttr = (ServletRequestAttributes)(RequestContextHolder.getRequestAttributes());
-            String userName = (String)reqAttr.getRequest().getSession().getAttribute("LOGIN_NAME");
+            String userName = (String)reqAttr.getRequest().getSession().getAttribute(Configuration.SESSION_LOGIN);
             if(StringUtils.isEmpty(userName)) {
                 response.sendRedirect(request.getContextPath()+"/login");
                 return false;

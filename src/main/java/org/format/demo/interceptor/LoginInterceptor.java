@@ -1,6 +1,7 @@
 package org.format.demo.interceptor;
 
 
+import org.format.demo.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -16,7 +17,7 @@ public class LoginInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object obj) throws Exception {
         HttpServletRequest req = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         HttpSession session = req.getSession();
-        Object userName = session.getAttribute("LOGIN_NAME");
+        Object userName = session.getAttribute(Configuration.SESSION_LOGIN);
         if (userName == null) {
             response.sendRedirect(request.getContextPath()+"/login");
             return false;
