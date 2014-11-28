@@ -51,8 +51,10 @@ public class AuthInterceptor implements HandlerInterceptor {
             AuthHandler authHandler = new DefaultAuthHandler();
 
             if(authHandler.handleAuth(userName, auths, roles, mode)) {
+                authHandler.authSuccess();
                 return true;
             } else {
+                authHandler.authError();
                 log.info("验证不通过");
                 HandlerMethod handlerMethod = (HandlerMethod) obj;
                 // json处理

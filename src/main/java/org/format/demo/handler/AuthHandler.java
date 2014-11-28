@@ -9,8 +9,8 @@ public interface AuthHandler {
 
     public boolean handleAuth(String userName, Set<String> auth, Set<String> roles, AuthMode mode);
 
-    public void handleSuccess();
+    public void authSuccess();
 
-    public void handleError();
+    public void authError();
 
 }

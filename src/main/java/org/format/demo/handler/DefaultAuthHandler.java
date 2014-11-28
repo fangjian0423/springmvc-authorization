@@ -44,12 +44,12 @@ public class DefaultAuthHandler implements AuthHandler {
     }
 
     @Override
-    public void handleSuccess() {
+    public void authSuccess() {
 
     }
 
     @Override
-    public void handleError() {
+    public void authError() {
 
     }
 
