@@ -19,21 +19,29 @@
        $('#updateuser').click(function() {
            $.post("<%=request.getContextPath()%>/user/update", function(data) {
                alert(data.msg);
+           }).error(function() {
+               alert('system error');
            });
        });
         $('#deleteuser').click(function() {
             $.post("<%=request.getContextPath()%>/user/delete", function(data) {
                 alert(data.msg);
+            }).error(function() {
+                alert('system error');
             });
         });
         $('#batchdeleteuser').click(function() {
             $.post("<%=request.getContextPath()%>/user/batchDelete", function(data) {
                 alert(data.msg);
+            }).error(function() {
+                alert('system error');
             });
         });
         $('#batchupdateuser').click(function() {
             $.post("<%=request.getContextPath()%>/user/batchUpdate", function(data) {
                 alert(data.msg);
+            }).error(function() {
+                alert('system error');
             });
         });
     });
