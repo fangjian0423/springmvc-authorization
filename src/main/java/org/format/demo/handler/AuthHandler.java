@@ -1,11 +1,13 @@
 package org.format.demo.handler;
 
 
-import java.util.List;
+import org.format.demo.model.AuthMode;
+
+import java.util.Set;
 
 public interface AuthHandler {
 
-    public boolean handleAuth(String userName, List<String> auth, List<String> roles);
+    public boolean handleAuth(String userName, Set<String> auth, Set<String> roles, AuthMode mode);
 
     public void handleSuccess();
 
