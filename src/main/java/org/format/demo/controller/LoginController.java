@@ -19,7 +19,7 @@ public class LoginController {
     @RequestMapping(method = RequestMethod.POST)
     public String login(@RequestParam("name")String name, HttpServletRequest request) {
         request.getSession().setAttribute("LOGIN_NAME", name);
-        return "test";
+        return "redirect:/test";
     }
 
 }
