@@ -7,11 +7,14 @@ import org.format.demo.dto.RoleDto;
 import org.format.demo.dto.UserDto;
 import org.format.demo.model.AuthMode;
 import org.format.demo.service.AuthService;
+import org.springframework.core.Ordered;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class DefaultAuthHandler implements AuthHandler {
+@Component
+public class DefaultAuthHandler implements AuthHandler, Ordered {
 
     @Override
     public boolean handleAuth(String userName, Set<String> auths, Set<String> roles, AuthMode mode) {
@@ -65,6 +68,11 @@ public class DefaultAuthHandler implements AuthHandler {
             result.addAll(roleDto.getAuthList());
         }
         return result;
+    }
+
+    @Override
+    public int getOrder() {
+        return 0;
     }
 
 }

@@ -1,13 +1,16 @@
 package org.format.demo.interceptor;
 
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.format.demo.Configuration;
 import org.format.demo.handler.AuthHandler;
-import org.format.demo.handler.DefaultAuthHandler;
 import org.format.demo.model.AuthMode;
+import org.springframework.beans.factory.BeanFactoryUtils;
+import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.core.OrderComparator;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -48,7 +51,16 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return false;
             }
 
-            AuthHandler authHandler = new DefaultAuthHandler();
+            Map<String, AuthHandler> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) Configuration.beanFactory, AuthHandler.class, true, false);
+            if(matchingBeans == null || CollectionUtils.isEmpty(matchingBeans.values())) {
+                throw new RuntimeException("no AuthHandler implememtation");
+            }
+
+            List<AuthHandler> authHandlers = new ArrayList<AuthHandler>(matchingBeans.values());
+            OrderComparator.sort(authHandlers);
+
+
+            AuthHandler authHandler = authHandlers.get(0);
 
             if(authHandler.handleAuth(userName, auths, roles, mode)) {
                 authHandler.authSuccess();
