@@ -1,16 +1,13 @@
 package org.format.demo.interceptor;
 
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.format.demo.Configuration;
-import org.format.demo.dao.RoleDao;
-import org.format.demo.dto.RoleDto;
-import org.format.demo.dto.UserDto;
+import org.format.demo.handler.AuthHandler;
+import org.format.demo.handler.DefaultAuthHandler;
 import org.format.demo.model.AuthMode;
-import org.format.demo.service.AuthService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -51,29 +48,11 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return false;
             }
 
+            AuthHandler authHandler = new DefaultAuthHandler();
 
-            AuthService authService = (AuthService) Configuration.beanFactory.getBean("authService");
-            UserDto userDto = authService.getUser(userName);
-
-            if(userDto == null) {
-                throw new RuntimeException("user: " + userName + " is not exist");
-            }
-
-            if(CollectionUtils.isNotEmpty(roles)) {
-                // 将角色转换成权限
-                Set<String> roleAuths = transferRoleToAuth(roles);
-                auths.addAll(roleAuths);
-            }
-
-            if(mode == AuthMode.AND && userDto.getAllAuth().containsAll(auths)) {
+            if(authHandler.handleAuth(userName, auths, roles, mode)) {
                 return true;
-            } else if(mode == AuthMode.OR) {
-                for(String auth : auths) {
-                    if(userDto.getAllAuth().contains(auth)) {
-                        return true;
-                    }
-                }
-            }  else {
+            } else {
                 log.info("验证不通过");
                 HandlerMethod handlerMethod = (HandlerMethod) obj;
                 // json处理
@@ -86,20 +65,6 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
         }
         return true;
-    }
-
-    private Set<String> transferRoleToAuth(Set<String> roles) {
-        RoleDao roleDao = (RoleDao) Configuration.beanFactory.getBean("roleDao");
-        Set<String> result = new HashSet<String>();
-        for(String role : roles) {
-            RoleDto roleDto = roleDao.searchByName(role);
-            if(roleDto == null) {
-                //FIXME
-                throw new RuntimeException("not exist role: " + role);
-            }
-            result.addAll(roleDto.getAuthList());
-        }
-        return result;
     }
 
     @Override
