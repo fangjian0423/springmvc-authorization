@@ -21,6 +21,9 @@ public class AuthService {
 
     public UserDto getUser(String name) {
         UserDto userDto = userDao.searchByName(name);
+        if(userDto == null) {
+            return null;
+        }
         List<Role> roleList = roleDao.getByUser(userDto.getName());
         List<RoleDto> roleDtoList = new ArrayList<RoleDto>(roleList.size());
         for(Role role : roleList) {
