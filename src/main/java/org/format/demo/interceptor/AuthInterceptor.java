@@ -9,6 +9,7 @@ import org.format.demo.Configuration;
 import org.format.demo.dao.RoleDao;
 import org.format.demo.dto.RoleDto;
 import org.format.demo.dto.UserDto;
+import org.format.demo.model.AuthMode;
 import org.format.demo.service.AuthService;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -27,8 +28,8 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     private static Map<String, MappingInfo> mappingInfoMap = new HashMap<String, MappingInfo>();
 
-    public synchronized void addAuth(String url, List<String> roles, List<String> auth) {
-        mappingInfoMap.put(url, new MappingInfo(url, roles, auth));
+    public synchronized void addAuth(String url, List<String> roles, List<String> auth, AuthMode mode) {
+        mappingInfoMap.put(url, new MappingInfo(url, roles, auth, mode));
     }
 
     @Override
@@ -41,6 +42,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             // 验证权限
             Set<String> auths = new HashSet<String>(mappingInfoMap.get(servletPath).getAuth());
             Set<String> roles = new HashSet<String>(mappingInfoMap.get(servletPath).getRoles());
+            AuthMode mode = mappingInfoMap.get(servletPath).getMode();
 
             ServletRequestAttributes reqAttr = (ServletRequestAttributes)(RequestContextHolder.getRequestAttributes());
             String userName = (String)reqAttr.getRequest().getSession().getAttribute("LOGIN_NAME");
@@ -63,9 +65,15 @@ public class AuthInterceptor implements HandlerInterceptor {
                 auths.addAll(roleAuths);
             }
 
-            if(userDto.getAllAuth().containsAll(auths)) {
+            if(mode == AuthMode.AND && userDto.getAllAuth().containsAll(auths)) {
                 return true;
-            } else {
+            } else if(mode == AuthMode.OR) {
+                for(String auth : auths) {
+                    if(userDto.getAllAuth().contains(auth)) {
+                        return true;
+                    }
+                }
+            }  else {
                 log.info("验证不通过");
                 HandlerMethod handlerMethod = (HandlerMethod) obj;
                 // json处理
@@ -109,11 +117,13 @@ public class AuthInterceptor implements HandlerInterceptor {
         private String url;
         private List<String> roles;
         private List<String> auth;
+        private AuthMode mode;
 
-        public MappingInfo(String url, List<String> roles, List<String> auth) {
+        public MappingInfo(String url, List<String> roles, List<String> auth, AuthMode mode) {
             this.url = url;
             this.roles = roles;
             this.auth = auth;
+            this.mode = mode;
         }
 
         public String getUrl() {
@@ -138,6 +148,14 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         public void setAuth(List<String> auth) {
             this.auth = auth;
+        }
+
+        public AuthMode getMode() {
+            return mode;
+        }
+
+        public void setMode(AuthMode mode) {
+            this.mode = mode;
         }
     }
 

@@ -6,6 +6,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.format.demo.annotation.Authorization;
 import org.format.demo.interceptor.AuthInterceptor;
+import org.format.demo.model.AuthMode;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -30,6 +31,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
         Authorization classAuthAnno = null;
+        AuthMode classMode = null;
         List<String> classUrls = new ArrayList<String>();
         if(bean.getClass().isAnnotationPresent(Controller.class)) {
             classAuthAnno = bean.getClass().getAnnotation(Authorization.class);
@@ -56,6 +58,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                 if(classAuthAnno.roles().length > 0) {
                     roles.addAll(Arrays.asList(classAuthAnno.roles()));
                 }
+                classMode = classAuthAnno.mode();
             }
 
             Method[] methods = bean.getClass().getDeclaredMethods();
@@ -63,6 +66,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
             for(Method method : methods) {
                 Set<String> roleAuth = new HashSet<String>(roles);
                 Set<String> authAuth = new HashSet<String>(auth);
+                AuthMode methodMode = null;
                 if((method.isAnnotationPresent(Authorization.class) && method.isAnnotationPresent(RequestMapping.class)) || classAuthAnno != null) {
                     if(log.isInfoEnabled()) {
                         log.info("class: " + bean.getClass() + ", method: " + method.getName() +
@@ -75,8 +79,12 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     if(methodAuth != null && methodAuth.auth().length > 0) {
                         authAuth.addAll(Arrays.asList(methodAuth.auth()));
                     }
+                    if(methodAuth != null) {
+                        methodMode = methodAuth.mode();
+                    }
 
                     List<String> methodUrls = null;
+
                     RequestMapping methodMapping = method.getAnnotation(RequestMapping.class);
                     if(methodMapping == null) {
                         continue;
@@ -101,7 +109,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                         for(String methodUrl : methodUrls) {
                             for(String classUrl : classUrls) {
                                 mapping.add(classUrl + methodUrl);
-                                authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth));
+                                authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth), methodMode == null ? classMode : methodMode);
                             }
                         }
                     }
