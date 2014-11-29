@@ -6,6 +6,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.format.demo.Configuration;
+import org.format.demo.exception.AuthException;
 import org.format.demo.handler.AuthHandler;
 import org.format.demo.model.AuthMode;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -75,7 +76,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     private AuthHandler getAuthHandler() {
         Map<String, AuthHandler> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) Configuration.beanFactory, AuthHandler.class, true, false);
         if(matchingBeans == null || CollectionUtils.isEmpty(matchingBeans.values())) {
-            throw new RuntimeException("no AuthHandler implememtation");
+            throw new AuthException("no AuthHandler implememtation");
         }
 
         List<AuthHandler> authHandlers = new ArrayList<AuthHandler>(matchingBeans.values());

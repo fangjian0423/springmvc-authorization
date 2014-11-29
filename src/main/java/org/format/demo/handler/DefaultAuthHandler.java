@@ -5,6 +5,7 @@ import org.format.demo.Configuration;
 import org.format.demo.dao.RoleDao;
 import org.format.demo.dto.RoleDto;
 import org.format.demo.dto.UserDto;
+import org.format.demo.exception.AuthException;
 import org.format.demo.model.AuthMode;
 import org.format.demo.service.AuthService;
 import org.springframework.core.Ordered;
@@ -25,7 +26,7 @@ public class DefaultAuthHandler implements AuthHandler, Ordered {
         UserDto userDto = authService.getUser(userName);
 
         if(userDto == null) {
-            throw new RuntimeException("user: " + userName + " is not exist");
+            throw new AuthException("user: " + userName + " is not exist");
         }
 
         if(CollectionUtils.isNotEmpty(roles)) {
@@ -62,8 +63,7 @@ public class DefaultAuthHandler implements AuthHandler, Ordered {
         for(String role : roles) {
             RoleDto roleDto = roleDao.searchByName(role);
             if(roleDto == null) {
-                //FIXME
-                throw new RuntimeException("not exist role: " + role);
+                throw new AuthException("not exist role: " + role);
             }
             result.addAll(roleDto.getAuthList());
         }
