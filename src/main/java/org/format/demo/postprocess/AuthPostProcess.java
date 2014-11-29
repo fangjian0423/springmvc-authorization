@@ -5,6 +5,7 @@ import org.apache.commons.collections.Transformer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.format.demo.annotation.Authorization;
+import org.format.demo.exception.AuthException;
 import org.format.demo.interceptor.AuthInterceptor;
 import org.format.demo.model.AuthMode;
 import org.springframework.beans.BeansException;
@@ -32,7 +33,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
     public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
         Authorization classAuthAnno = null;
         List<String> classUrls = new ArrayList<String>();
-        if(bean.getClass().isAnnotationPresent(Controller.class)) {
+        if(bean.getClass().isAnnotationPresent(Controller.class)) { // 找出类中的Authorization注解
             classAuthAnno = bean.getClass().getAnnotation(Authorization.class);
             RequestMapping classMapping = bean.getClass().getAnnotation(RequestMapping.class);
             if(classMapping.value().length > 0) {
@@ -45,7 +46,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
             return bean;
         }
 
-        if(!classUrls.isEmpty()) {
+        if(!classUrls.isEmpty()) { // 类中的Authorization注解存在的话继续执行
             AuthInterceptor authInterceptor = new AuthInterceptor();
             List<String> roles = new ArrayList<String>();
             List<String> auth = new ArrayList<String>();
@@ -61,7 +62,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
 
             Method[] methods = bean.getClass().getDeclaredMethods();
             List<String> mapping = new ArrayList<String>(methods.length);
-            for(Method method : methods) {
+            for(Method method : methods) { // 遍历带有Controller和RequestMapping注解的控制器
                 Set<String> roleAuth = new HashSet<String>(roles);
                 Set<String> authAuth = new HashSet<String>(auth);
                 AuthMode methodMode = null;
@@ -70,7 +71,15 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                         log.info("class: " + bean.getClass() + ", method: " + method.getName() +
                                 "annotaion: " + method.getAnnotation(Authorization.class));
                     }
+
+                    RequestMapping methodMapping = method.getAnnotation(RequestMapping.class);
+                    if(methodMapping == null) {
+                        continue;
+                    }
+
                     Authorization methodAuth = method.getAnnotation(Authorization.class);
+
+                    /** 整合类和方法的Authorization注解属性 */
                     if(methodAuth != null && methodAuth.roles().length > 0) {
                         roleAuth.addAll(Arrays.asList(methodAuth.roles()));
                     }
@@ -80,15 +89,14 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     if(methodAuth != null) {
                         methodMode = methodAuth.mode();
                     }
+                    /** 整合类和方法的Authorization注解属性 */
 
                     List<String> methodUrls = null;
 
-                    RequestMapping methodMapping = method.getAnnotation(RequestMapping.class);
-                    if(methodMapping == null) {
-                        continue;
-                    }
                     if(methodMapping.value().length > 0) {
                         methodUrls = Arrays.asList(methodMapping.value());
+
+                        // 处理url，所有不以“/”结尾的url全部加上url，然后丢到AuthInterceptor的静态变量中，同理AuthInterceptor中处理的时候不以"/"结尾的也加上"/"
                         methodUrls = (List<String>)CollectionUtils.collect(methodUrls, new Transformer() {
                             @Override
                             public Object transform(Object o) {
@@ -100,6 +108,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                             }
                         });
                     } else {
+                        // 不带value属性的RequestMapping默认为"/"
                         methodUrls = new ArrayList<String>();
                         methodUrls.add("/");
                     }
@@ -107,6 +116,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                         for(String methodUrl : methodUrls) {
                             for(String classUrl : classUrls) {
                                 mapping.add(classUrl + methodUrl);
+                                // 设置AuthInterceptor静态变量
                                 authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth), methodMode == null ? classAuthAnno.mode() : methodMode);
                             }
                         }
@@ -123,12 +133,13 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                 if(log.isInfoEnabled()) {
                     log.info("class: " + bean.getClass() + ", mapping: " + mapping);
                 }
+                // 使用反射设置RequestMappingHandlerMapping的拦截器属性，加入AuthInterceptor
                 RequestMappingHandlerMapping requestMappingHandlerMapping = (RequestMappingHandlerMapping)beanFactory.getBean("org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping#0");
                 Field interceptorField = null;
                 List<MappedInterceptor> mappedInterceptorList = null;
                 try {
                     interceptorField = requestMappingHandlerMapping.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField("mappedInterceptors");
-                    interceptorField.setAccessible(true);
+                    interceptorField.setAccessible(true); // mappedInterceptors是个private final属性，需要加上这句话
                     mappedInterceptorList = (List<MappedInterceptor>)interceptorField.get(requestMappingHandlerMapping);
                     for(String classUrl : classUrls) {
                         mappedInterceptorList.add(new MappedInterceptor(new String[] {classUrl + "/**"}, authInterceptor));
@@ -136,6 +147,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     ReflectionUtils.setField(interceptorField, requestMappingHandlerMapping, mappedInterceptorList);
                 } catch (Exception e) {
                     log.error("RequestMappingHandlerMapping reflect field error", e);
+                    throw new AuthException("reflect interceptors error", e);
                 }
             }
 
