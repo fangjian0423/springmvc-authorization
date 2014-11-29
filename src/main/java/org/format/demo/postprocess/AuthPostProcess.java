@@ -31,7 +31,6 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
     @Override
     public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
         Authorization classAuthAnno = null;
-        AuthMode classMode = null;
         List<String> classUrls = new ArrayList<String>();
         if(bean.getClass().isAnnotationPresent(Controller.class)) {
             classAuthAnno = bean.getClass().getAnnotation(Authorization.class);
@@ -58,7 +57,6 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                 if(classAuthAnno.roles().length > 0) {
                     roles.addAll(Arrays.asList(classAuthAnno.roles()));
                 }
-                classMode = classAuthAnno.mode();
             }
 
             Method[] methods = bean.getClass().getDeclaredMethods();
@@ -109,7 +107,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                         for(String methodUrl : methodUrls) {
                             for(String classUrl : classUrls) {
                                 mapping.add(classUrl + methodUrl);
-                                authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth), methodMode == null ? classMode : methodMode);
+                                authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth), methodMode == null ? classAuthAnno.mode() : methodMode);
                             }
                         }
                     }
