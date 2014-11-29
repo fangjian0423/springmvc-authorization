@@ -81,3 +81,8 @@ SpringMVC简单的权限框架
     }
 
 /user/add地址的访问权限是拥有"manager1"和"manager2"这2个角色的用户
+
+
+###编写自定义的权限验证逻辑###
+
+实现AuthHandler接口即可，同时还需要实现Spring的Ordered接口，默认的AuthHandler是DefaultAuthHandler，他的order值为0
