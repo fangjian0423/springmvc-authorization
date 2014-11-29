@@ -51,16 +51,7 @@ public class AuthInterceptor implements HandlerInterceptor {
                 return false;
             }
 
-            Map<String, AuthHandler> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) Configuration.beanFactory, AuthHandler.class, true, false);
-            if(matchingBeans == null || CollectionUtils.isEmpty(matchingBeans.values())) {
-                throw new RuntimeException("no AuthHandler implememtation");
-            }
-
-            List<AuthHandler> authHandlers = new ArrayList<AuthHandler>(matchingBeans.values());
-            OrderComparator.sort(authHandlers);
-
-
-            AuthHandler authHandler = authHandlers.get(0);
+            AuthHandler authHandler = getAuthHandler();
 
             if(authHandler.handleAuth(userName, auths, roles, mode)) {
                 authHandler.authSuccess();
@@ -79,6 +70,20 @@ public class AuthInterceptor implements HandlerInterceptor {
             }
         }
         return true;
+    }
+
+    private AuthHandler getAuthHandler() {
+        Map<String, AuthHandler> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) Configuration.beanFactory, AuthHandler.class, true, false);
+        if(matchingBeans == null || CollectionUtils.isEmpty(matchingBeans.values())) {
+            throw new RuntimeException("no AuthHandler implememtation");
+        }
+
+        List<AuthHandler> authHandlers = new ArrayList<AuthHandler>(matchingBeans.values());
+        OrderComparator.sort(authHandlers);
+
+
+        AuthHandler authHandler = authHandlers.get(0);
+        return authHandler;
     }
 
     @Override
