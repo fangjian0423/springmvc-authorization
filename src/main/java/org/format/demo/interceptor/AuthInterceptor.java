@@ -29,9 +29,15 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     private static Map<String, MappingInfo> mappingInfoMap = new HashMap<String, MappingInfo>();
 
+    public AuthInterceptor() {
+        this.authHandler = getAuthHandler();
+    }
+
     public synchronized void addAuth(String url, List<String> roles, List<String> auth, AuthMode mode) {
         mappingInfoMap.put(url, new MappingInfo(url, roles, auth, mode));
     }
+
+    private AuthHandler authHandler;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object obj) throws Exception {
@@ -51,8 +57,6 @@ public class AuthInterceptor implements HandlerInterceptor {
                 response.sendRedirect(request.getContextPath()+"/login");
                 return false;
             }
-
-            AuthHandler authHandler = getAuthHandler();
 
             if(authHandler.handleAuth(userName, auths, roles, mode)) {
                 authHandler.authSuccess();
