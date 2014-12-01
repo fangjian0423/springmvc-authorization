@@ -2,6 +2,7 @@ package org.format.demo.handler;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.format.demo.Configuration;
+import org.format.demo.dao.AuthDao;
 import org.format.demo.dao.RoleDao;
 import org.format.demo.dto.RoleDto;
 import org.format.demo.dto.UserDto;
@@ -29,6 +30,8 @@ public class DefaultAuthHandler implements AuthHandler, Ordered {
             throw new AuthException("user: " + userName + " is not exist");
         }
 
+        checkAuth(allAuths);
+
         if(CollectionUtils.isNotEmpty(roles)) {
             // 将角色转换成权限
             Set<String> roleAuths = transferRoleToAuth(roles);
@@ -45,6 +48,15 @@ public class DefaultAuthHandler implements AuthHandler, Ordered {
             }
         }
         return false;
+    }
+
+    private void checkAuth(Set<String> allAuths) {
+        AuthDao authDao = (AuthDao) Configuration.beanFactory.getBean("authDao");
+        for(String auth : allAuths) {
+            if(authDao.searchByName(auth) == null) {
+                throw new AuthException("auth: " + auth + " is not exist");
+            }
+        }
     }
 
     @Override
