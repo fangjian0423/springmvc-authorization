@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @RequestMapping("/batchUpdate")
-    @Authorization(auth = "update-user")
+    @Authorization(auth = {"update-user", "add-role"})
     @ResponseBody
     public CommonData batchUpdate() {
         CommonData data = new CommonData(true, "success");
