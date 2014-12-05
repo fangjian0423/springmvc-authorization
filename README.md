@@ -85,4 +85,4 @@ SpringMVC简单的权限框架
 
 ###编写自定义的权限验证逻辑###
 
-实现AuthHandler接口即可，同时还需要实现Spring的Ordered接口，默认的AuthHandler是DefaultAuthHandler，他的order值为0
+实现AuthHandler接口和Spring的Ordered接口，还要加上@Component注解或写在spring配置文件中，默认的AuthHandler实现类是DefaultAuthHandler，他的order值为0
