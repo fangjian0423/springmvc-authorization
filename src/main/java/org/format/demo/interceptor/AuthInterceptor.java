@@ -84,7 +84,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     private AuthHandler getAuthHandler() {
         Map<String, AuthHandler> matchingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors((ListableBeanFactory) Configuration.beanFactory, AuthHandler.class, true, false);
         if(matchingBeans == null || CollectionUtils.isEmpty(matchingBeans.values())) {
-            throw new AuthException("no AuthHandler implememtation");
+            throw new AuthException("no AuthHandler implementation");
         }
 
         List<AuthHandler> authHandlers = new ArrayList<AuthHandler>(matchingBeans.values());
