@@ -1,7 +1,6 @@
 package org.format.demo.handler;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.format.demo.Configuration;
 import org.format.demo.dao.AuthDao;
 import org.format.demo.dao.RoleDao;
 import org.format.demo.dto.RoleDto;
@@ -9,6 +8,7 @@ import org.format.demo.dto.UserDto;
 import org.format.demo.exception.AuthException;
 import org.format.demo.model.AuthMode;
 import org.format.demo.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +18,20 @@ import java.util.Set;
 @Component
 public class DefaultAuthHandler implements AuthHandler, Ordered {
 
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private RoleDao roleDao;
+
+    @Autowired
+    private AuthDao authDao;
+
     @Override
     public boolean handleAuth(String userName, Set<String> auths, Set<String> roles, AuthMode mode) {
 
         Set<String> allAuths = new HashSet<String>(auths);
 
-        AuthService authService = (AuthService) Configuration.beanFactory.getBean("authService");
         UserDto userDto = authService.getUser(userName);
 
         if(userDto == null) {
@@ -51,7 +59,6 @@ public class DefaultAuthHandler implements AuthHandler, Ordered {
     }
 
     private void checkAuth(Set<String> allAuths) {
-        AuthDao authDao = (AuthDao) Configuration.beanFactory.getBean("authDao");
         for(String auth : allAuths) {
             if(authDao.searchByName(auth) == null) {
                 throw new AuthException("auth: " + auth + " is not exist");
@@ -70,7 +77,6 @@ public class DefaultAuthHandler implements AuthHandler, Ordered {
     }
 
     private Set<String> transferRoleToAuth(Set<String> roles) {
-        RoleDao roleDao = (RoleDao) Configuration.beanFactory.getBean("roleDao");
         Set<String> result = new HashSet<String>();
         for(String role : roles) {
             RoleDto roleDto = roleDao.searchByName(role);
