@@ -33,8 +33,12 @@ public class AuthInterceptor implements HandlerInterceptor {
         this.authHandler = getAuthHandler();
     }
 
-    public synchronized void addAuth(String url, List<String> roles, List<String> auth, AuthMode mode) {
+    public static synchronized void addAuth(String url, List<String> roles, List<String> auth, AuthMode mode) {
         mappingInfoMap.put(url, new MappingInfo(url, roles, auth, mode));
+    }
+
+    public static Map<String, MappingInfo> getMappingInfoMap() {
+        return mappingInfoMap;
     }
 
     private AuthHandler authHandler;
@@ -102,7 +106,7 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
 
-    private class MappingInfo {
+    private static class MappingInfo {
         private String url;
         private List<String> roles;
         private List<String> auth;

@@ -47,7 +47,6 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
         }
 
         if(!classUrls.isEmpty()) { // 类中的Authorization注解存在的话继续执行
-            AuthInterceptor authInterceptor = new AuthInterceptor();
             List<String> roles = new ArrayList<String>();
             List<String> auth = new ArrayList<String>();
 
@@ -115,9 +114,12 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     if((!CollectionUtils.isEmpty(roleAuth) || !CollectionUtils.isEmpty(authAuth)) && !methodUrls.isEmpty()) {
                         for(String methodUrl : methodUrls) {
                             for(String classUrl : classUrls) {
+                                if(AuthInterceptor.getMappingInfoMap().containsKey(classUrl+methodUrl)) {
+                                    throw new AuthException("exist url mapping: " + classUrl + methodUrl);
+                                }
                                 mapping.add(classUrl + methodUrl);
                                 // 设置AuthInterceptor静态变量
-                                authInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth), methodMode == null ? classAuthAnno.mode() : methodMode);
+                                AuthInterceptor.addAuth(classUrl + methodUrl, new ArrayList<String>(roleAuth), new ArrayList<String>(authAuth), methodMode == null ? classAuthAnno.mode() : methodMode);
                             }
                         }
                     }
@@ -141,6 +143,7 @@ public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
                     interceptorField = requestMappingHandlerMapping.getClass().getSuperclass().getSuperclass().getSuperclass().getDeclaredField("mappedInterceptors");
                     interceptorField.setAccessible(true); // mappedInterceptors是个private final属性，需要加上这句话
                     mappedInterceptorList = (List<MappedInterceptor>)interceptorField.get(requestMappingHandlerMapping);
+                    AuthInterceptor authInterceptor = new AuthInterceptor();
                     for(String classUrl : classUrls) {
                         mappedInterceptorList.add(new MappedInterceptor(new String[] {classUrl + "/**"}, authInterceptor));
                     }
