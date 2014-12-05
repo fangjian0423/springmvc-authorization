@@ -8,6 +8,7 @@ import org.apache.commons.logging.LogFactory;
 import org.format.demo.Configuration;
 import org.format.demo.exception.AuthException;
 import org.format.demo.handler.AuthHandler;
+import org.format.demo.model.AuthMappingInfo;
 import org.format.demo.model.AuthMode;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
@@ -27,17 +28,17 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     private static Log log = LogFactory.getLog(AuthInterceptor.class);
 
-    private static Map<String, MappingInfo> mappingInfoMap = new HashMap<String, MappingInfo>();
+    private static Map<String, AuthMappingInfo> mappingInfoMap = new HashMap<String, AuthMappingInfo>();
 
     public AuthInterceptor() {
         this.authHandler = getAuthHandler();
     }
 
     public static synchronized void addAuth(String url, List<String> roles, List<String> auth, AuthMode mode) {
-        mappingInfoMap.put(url, new MappingInfo(url, roles, auth, mode));
+        mappingInfoMap.put(url, new AuthMappingInfo(url, roles, auth, mode));
     }
 
-    public static Map<String, MappingInfo> getMappingInfoMap() {
+    public static Map<String, AuthMappingInfo> getMappingInfoMap() {
         return mappingInfoMap;
     }
 
@@ -50,7 +51,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             servletPath += "/";
         }
         if(mappingInfoMap.containsKey(servletPath)) {
-            MappingInfo mappingInfo = mappingInfoMap.get(servletPath);
+            AuthMappingInfo mappingInfo = mappingInfoMap.get(servletPath);
             // 验证权限
             Set<String> auths = new HashSet<String>(mappingInfo.getAuth());
             Set<String> roles = new HashSet<String>(mappingInfo.getRoles());
@@ -106,51 +107,5 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     }
 
-
-    private static class MappingInfo {
-        private String url;
-        private List<String> roles;
-        private List<String> auth;
-        private AuthMode mode;
-
-        public MappingInfo(String url, List<String> roles, List<String> auth, AuthMode mode) {
-            this.url = url;
-            this.roles = roles;
-            this.auth = auth;
-            this.mode = mode;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public List<String> getRoles() {
-            return roles;
-        }
-
-        public void setRoles(List<String> roles) {
-            this.roles = roles;
-        }
-
-        public List<String> getAuth() {
-            return auth;
-        }
-
-        public void setAuth(List<String> auth) {
-            this.auth = auth;
-        }
-
-        public AuthMode getMode() {
-            return mode;
-        }
-
-        public void setMode(AuthMode mode) {
-            this.mode = mode;
-        }
-    }
 
 }
