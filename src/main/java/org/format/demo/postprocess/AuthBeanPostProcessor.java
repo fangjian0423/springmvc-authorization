@@ -24,9 +24,9 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 @Component
-public class AuthPostProcess implements BeanPostProcessor, BeanFactoryAware {
+public class AuthBeanPostProcessor implements BeanPostProcessor, BeanFactoryAware {
 
-    private static Log log = LogFactory.getLog(AuthPostProcess.class);
+    private static Log log = LogFactory.getLog(AuthBeanPostProcessor.class);
     private BeanFactory beanFactory;
 
     @Override
