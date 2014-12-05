@@ -50,10 +50,11 @@ public class AuthInterceptor implements HandlerInterceptor {
             servletPath += "/";
         }
         if(mappingInfoMap.containsKey(servletPath)) {
+            MappingInfo mappingInfo = mappingInfoMap.get(servletPath);
             // 验证权限
-            Set<String> auths = new HashSet<String>(mappingInfoMap.get(servletPath).getAuth());
-            Set<String> roles = new HashSet<String>(mappingInfoMap.get(servletPath).getRoles());
-            AuthMode mode = mappingInfoMap.get(servletPath).getMode();
+            Set<String> auths = new HashSet<String>(mappingInfo.getAuth());
+            Set<String> roles = new HashSet<String>(mappingInfo.getRoles());
+            AuthMode mode = mappingInfo.getMode();
 
             ServletRequestAttributes reqAttr = (ServletRequestAttributes)(RequestContextHolder.getRequestAttributes());
             String userName = (String)reqAttr.getRequest().getSession().getAttribute(Configuration.SESSION_LOGIN);
