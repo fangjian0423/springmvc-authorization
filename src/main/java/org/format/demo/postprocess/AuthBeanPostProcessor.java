@@ -29,6 +29,9 @@ public class AuthBeanPostProcessor implements BeanPostProcessor, BeanFactoryAwar
     private static Log log = LogFactory.getLog(AuthBeanPostProcessor.class);
     private BeanFactory beanFactory;
 
+    public static String authErrorUrlForForward = "/auth/noauth";
+    public static String authErrorUrlForJson = "/auth/noauth-body?success=false&msg=noauth";
+
     @Override
     public Object postProcessBeforeInitialization(Object bean, String name) throws BeansException {
         Authorization classAuthAnno = null;

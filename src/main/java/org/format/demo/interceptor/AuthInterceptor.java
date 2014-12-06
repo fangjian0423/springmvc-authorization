@@ -10,6 +10,7 @@ import org.format.demo.exception.AuthException;
 import org.format.demo.handler.AuthHandler;
 import org.format.demo.model.AuthMappingInfo;
 import org.format.demo.model.AuthMode;
+import org.format.demo.postprocess.AuthBeanPostProcessor;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.core.OrderComparator;
@@ -71,11 +72,12 @@ public class AuthInterceptor implements HandlerInterceptor {
                 authHandler.authError();
                 log.info("验证不通过");
                 HandlerMethod handlerMethod = (HandlerMethod) obj;
-                // json处理
                 if(handlerMethod.getMethod().isAnnotationPresent(ResponseBody.class)) {
-                    response.sendRedirect(request.getContextPath()+"/auth/noauth-body?success=false&msg=noauth");
+                    // json处理
+                    response.sendRedirect(request.getContextPath() + AuthBeanPostProcessor.authErrorUrlForJson);
                 } else {
-                    response.sendRedirect(request.getContextPath()+"/auth/noauth");
+                    // 页面跳转处理
+                    response.sendRedirect(request.getContextPath() + AuthBeanPostProcessor.authErrorUrlForForward);
                 }
                 return false;
             }
