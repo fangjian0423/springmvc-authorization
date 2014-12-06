@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @RequestMapping("/add")
-    @Authorization(roles = {"manager"})
+    @Authorization(auth = "add-role")
     public String add() {
         return "user";
     }
